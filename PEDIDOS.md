@@ -1,59 +1,46 @@
-# Pedidos do Dia 2 — Spec Kit e a constituição
+# Pedidos do Dia 3 — Especifique de verdade
 
 Tudo o que foi digitado para chegar a esta solução.
 
-## Comandos no terminal
+## 1. Criar o spec
 
-Instalação do uv (Windows, PowerShell):
-
-```
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-No Mac ou no Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`.
-
-Depois, **num terminal novo** (no terminal em que o uv foi instalado, o comando `uv` ainda não é reconhecido):
+Num chat novo, no modo agente:
 
 ```
-uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v1.3.0
-specify version
+/speckit-specify Escreva em português do Brasil. O Hábito Certo é um app para quem quer criar hábitos. A pessoa cadastra hábitos pelo nome, marca "fiz hoje" em cada um e vê há quantos dias seguidos cumpriu cada hábito. Regras: um hábito marcado pela primeira vez tem sequência 1; marcar duas vezes no mesmo dia não muda a sequência; se a pessoa pulou um dia, a sequência volta a ser 1 na próxima marcação. A pessoa também pode ver a lista dos seus hábitos com a sequência de cada um.
 ```
 
-Criação do projeto. O `init` pergunta o tipo de script: no Windows, `ps` já vem marcado e basta apertar Enter.
+A descrição não cita linguagem, banco de dados nem tela: isso fica para o plano. O comando criou sozinho a branch `001-habitos-sequencia` e um checklist de qualidade.
+
+## 2. Esclarecer, primeira tentativa (sem foco)
 
 ```
-specify init habito-certo --integration copilot --extension git
-cd habito-certo
-git init -b main
+/speckit-clarify Responda e escreva em português do Brasil.
 ```
 
-O Spec Kit cria os arquivos, mas não inicia o Git: por isso o `git init`. O `-b main` faz a branch principal nascer com o nome que o GitHub usa.
+**Resultado:** "No critical ambiguities detected". Nenhuma pergunta, nenhuma mudança no spec. O agente não encontrou nem a dúvida do dia pulado.
 
-## Pedido ao agente
+## 3. Esclarecer, segunda tentativa (com as dúvidas)
 
-Com a pasta `habito-certo` aberta no VS Code, num chat novo, no modo agente:
+Antes de rodar de novo, as dúvidas foram listadas lendo o spec. Depois, num chat novo:
 
 ```
-/speckit-constitution Escreva em português do Brasil. Os princípios do projeto Hábito Certo são:
-1. Só ferramentas gratuitas: nada que exija pagamento ou cartão.
-2. Os dados ficam no computador da pessoa: nada vai para a internet.
-3. Todo comportamento tem critério de aceitação no formato Dado, Quando, Então.
-4. "Dia" é a data local do computador; o projeto não trata fuso horário.
-5. Nada é implementado sem estar no spec.
+/speckit-clarify Responda e escreva em português do Brasil. Foque nestas dúvidas: 1) se a pessoa não marcou um hábito ontem, o que a lista mostra hoje antes de ela marcar: a sequência antiga ou 0? 2) dá para cadastrar dois hábitos com o mesmo nome? 3) "Leitura" e "leitura" são o mesmo hábito?
 ```
 
-O agente pediu permissão algumas vezes para rodar os scripts do Spec Kit. Todas foram aprovadas.
+O agente fez três perguntas, uma por vez, cada uma com opções e uma recomendação:
+
+| Pergunta | Recomendação do agente | Resposta dada | Por quê |
+| :--- | :--- | :--- | :--- |
+| O que a lista mostra depois de um dia pulado? | A: a sequência antiga | **B: mostrar 0** | A sequência já foi quebrada; mostrar a antiga esconde isso da pessoa |
+| Dois hábitos com o mesmo nome? | A: não permitir | **A** | Com dois nomes iguais, não dá para saber em qual marcar |
+| "Leitura" e "leitura" são o mesmo hábito? | A: sim | **A** | Senão, a regra anterior é contornada trocando uma letra |
+
+As respostas foram dadas digitando só a letra no chat. O agente registrou as decisões na seção "Clarifications" do spec e criou os requisitos FR-011 e FR-012.
 
 ## Commit
 
 ```
 git add .
-git commit -m "docs: cria constituição do Hábito Certo v1.0.0"
+git commit -m "docs: especifica hábitos e sequências com clarificações"
 ```
-
-O `/speckit-git-commit`, sugerido pelo agente no fim, não foi usado: o commit pelo terminal não gasta crédito.
-
-## O que aconteceu no caminho
-
-- O agente manteve os cinco princípios e acrescentou seções do modelo do Spec Kit: restrições do produto, fluxo de desenvolvimento e governança.
-- Alguns títulos ficaram em inglês, herdados do modelo, e a data de ratificação ficou como `TODO`.
