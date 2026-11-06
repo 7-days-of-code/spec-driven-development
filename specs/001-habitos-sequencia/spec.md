@@ -93,6 +93,7 @@ A pessoa mantém hábitos distintos e acompanha a sequência de cada um sem que 
 - **FR-010**: O sistema MUST considerar como data do dia a data local informada pelo computador da pessoa.
 - **FR-011**: Se a última marcação de um hábito ocorreu há dois ou mais dias e ele ainda não foi marcado hoje, o sistema MUST exibir sequência 0; após uma nova marcação, MUST exibir sequência 1.
 - **FR-012**: O sistema MUST impedir o cadastro de um hábito quando já existir outro cujo nome seja igual sem diferenciar maiúsculas e minúsculas e MUST informar que o nome já está em uso.
+- **FR-013**: Os hábitos e as marcações MUST continuar salvos depois que o app é fechado e aberto de novo.
 
 ### Key Entities *(include if feature involves data)*
 

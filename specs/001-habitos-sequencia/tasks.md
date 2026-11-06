@@ -16,15 +16,15 @@ description: "Tarefas para implementar hábitos e sequências diárias"
 
 **Objetivo**: Configurar as dependências e os arquivos-base previstos no plano.
 
-- [ ] T001 [P] Declarar Flask e pytest como dependências em `requirements.txt`, mantendo compatibilidade com Python 3.11 ou superior
-- [ ] T002 [P] Ignorar `.venv/`, `__pycache__/`, `.pytest_cache/` e `instance/` em `.gitignore` para não versionar ambientes, caches e dados locais
+- [x] T001 [P] Declarar Flask e pytest como dependências em `requirements.txt`, mantendo compatibilidade com Python 3.11 ou superior
+- [x] T002 [P] Ignorar `.venv/`, `__pycache__/`, `.pytest_cache/` e `instance/` em `.gitignore` para não versionar ambientes, caches e dados locais
 
 ## Fase 2: Fundação
 
 **Objetivo**: Disponibilizar persistência local e infraestrutura Flask antes das histórias.
 
-- [ ] T003 [P] Criar `schema.sql` com as tabelas de hábitos e marcações: para `name`, aplicar a regra “Obrigatório; texto apresentado na interface, removendo espaços no início e no fim. Não pode ser vazio após `strip()`.”; para `name_key`, aplicar “Obrigatório e único; forma NFC de `name.strip()` convertida por `casefold()`.”; para `habit_id`, aplicar “Obrigatório; chave estrangeira para `habit.id`.”; para `completed_on`, aplicar “Obrigatório; data local em ISO 8601 (`YYYY-MM-DD`).”; impor unicidade em `(habit_id, completed_on)`
-- [ ] T004 [P] Criar a fábrica `create_app`, conexão SQLite por contexto de requisição, fechamento da conexão e inicialização do esquema em `app.py`; usar banco em `instance/` por padrão, permitir banco temporário pela configuração de testes e ativar chaves estrangeiras em cada conexão
+- [x] T003 [P] Criar `schema.sql` com as tabelas de hábitos e marcações: para `name`, aplicar a regra “Obrigatório; texto apresentado na interface, removendo espaços no início e no fim. Não pode ser vazio após `strip()`.”; para `name_key`, aplicar “Obrigatório e único; forma NFC de `name.strip()` convertida por `casefold()`. ”; para `habit_id`, aplicar “Obrigatório; chave estrangeira para `habit.id`. ”; para `completed_on`, aplicar “Obrigatório; data local em ISO 8601 (`YYYY-MM-DD`).”; impor unicidade em `(habit_id, completed_on)`
+- [x] T004 [P] Criar a fábrica `create_app`, conexão SQLite por contexto de requisição, fechamento da conexão e inicialização do esquema em `app.py`; usar banco em `instance/` por padrão, permitir banco temporário pela configuração de testes e ativar chaves estrangeiras em cada conexão
 
 **Ponto de verificação**: Aplicação e banco local podem ser inicializados; histórias podem começar.
 
