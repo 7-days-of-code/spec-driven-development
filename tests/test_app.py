@@ -1,3 +1,4 @@
+import sqlite3
 import unicodedata
 from datetime import date
 
@@ -214,3 +215,159 @@ def test_habits_and_sequences_persist_after_app_recreation(tmp_path, monkeypatch
     assert response.status_code == 200
     assert "Leitura" in text
     assert "Sequência: 3" in text
+
+
+def test_weekly_goal_accepts_values_from_one_to_seven_per_habit(tmp_path):
+    database = str(tmp_path / "habitos.sqlite3")
+    app = create_app({"TESTING": True, "DATABASE": database})
+    client = app.test_client()
+
+    for days in range(1, 8):
+        response = client.post("/habits", data={"name": f"Hábito {days}"})
+        assert response.status_code == 302
+        response = client.post(
+            f"/habits/{days}/weekly-goal", data={"days": str(days)}
+        )
+        assert response.status_code == 302
+
+    with sqlite3.connect(database) as db:
+        goals = db.execute(
+            "SELECT weekly_goal FROM habit ORDER BY id"
+        ).fetchall()
+    assert goals == [(days,) for days in range(1, 8)]
+
+
+def test_weekly_goal_can_be_changed_and_removed(tmp_path):
+    database = str(tmp_path / "habitos.sqlite3")
+    app = create_app({"TESTING": True, "DATABASE": database})
+    client = app.test_client()
+    client.post("/habits", data={"name": "Leitura"})
+    client.post("/habits/1/weekly-goal", data={"days": "3"})
+
+    response = client.post(
+        "/habits/1/weekly-goal", data={"days": "5"}, follow_redirects=True
+    )
+    assert response.status_code == 200
+    with sqlite3.connect(database) as db:
+        assert db.execute(
+            "SELECT weekly_goal FROM habit WHERE id = 1"
+        ).fetchone() == (5,)
+
+    response = client.post(
+        "/habits/1/weekly-goal", data={"days": ""}, follow_redirects=True
+    )
+    assert response.status_code == 200
+    with sqlite3.connect(database) as db:
+        assert db.execute(
+            "SELECT weekly_goal FROM habit WHERE id = 1"
+        ).fetchone() == (None,)
+
+
+def test_invalid_weekly_goal_is_rejected_without_changing_saved_goal(tmp_path):
+    database = str(tmp_path / "habitos.sqlite3")
+    app = create_app({"TESTING": True, "DATABASE": database})
+    client = app.test_client()
+    client.post("/habits", data={"name": "Leitura"})
+    client.post("/habits/1/weekly-goal", data={"days": "4"})
+
+    for invalid_days in ("0", "8", "abc", "2.5", "-1"):
+        response = client.post(
+            "/habits/1/weekly-goal",
+            data={"days": invalid_days},
+            follow_redirects=True,
+        )
+        assert response.status_code == 200
+        assert "1 a 7" in response.get_data(as_text=True)
+        with sqlite3.connect(database) as db:
+            assert db.execute(
+                "SELECT weekly_goal FROM habit WHERE id = 1"
+            ).fetchone() == (4,)
+
+
+def test_weekly_goal_persists_without_changing_checkins_or_sequence(
+    tmp_path, monkeypatch
+):
+    database = str(tmp_path / "habitos.sqlite3")
+    app = create_app({"TESTING": True, "DATABASE": database})
+    client = app.test_client()
+
+    class FrozenDate(date):
+        current = date(2026, 11, 10)
+
+        @classmethod
+        def today(cls):
+            return cls.current
+
+    monkeypatch.setattr(app_module, "date", FrozenDate)
+    client.post("/habits", data={"name": "Leitura"})
+    for day in (10, 11, 12):
+        FrozenDate.current = date(2026, 11, day)
+        client.post("/habits/1/check-ins")
+    client.post("/habits/1/weekly-goal", data={"days": "3"})
+
+    response = client.post(
+        "/habits/1/weekly-goal", data={"days": "5"}, follow_redirects=True
+    )
+    assert response.status_code == 200
+    assert "Sequência: 3" in response.get_data(as_text=True)
+
+    recreated_app = create_app({"TESTING": True, "DATABASE": database})
+    recreated_client = recreated_app.test_client()
+    response = recreated_client.get("/")
+    assert response.status_code == 200
+    text = response.get_data(as_text=True)
+    assert 'value="5"' in text
+    assert "Sequência: 3" in text
+
+    response = recreated_client.post(
+        "/habits/1/weekly-goal", data={"days": ""}, follow_redirects=True
+    )
+    assert response.status_code == 200
+    assert "Sequência: 3" in response.get_data(as_text=True)
+    with sqlite3.connect(database) as db:
+        assert db.execute(
+            "SELECT COUNT(*) FROM habit_checkin WHERE habit_id = 1"
+        ).fetchone() == (3,)
+        assert db.execute(
+            "SELECT weekly_goal FROM habit WHERE id = 1"
+        ).fetchone() == (None,)
+
+
+def test_weekly_goal_form_shows_current_value_and_empty_removal(tmp_path):
+    app = create_app(
+        {"TESTING": True, "DATABASE": str(tmp_path / "habitos.sqlite3")}
+    )
+    client = app.test_client()
+    client.post("/habits", data={"name": "Leitura"})
+    client.post("/habits", data={"name": "Caminhada"})
+    client.post("/habits/1/weekly-goal", data={"days": "4"})
+
+    response = client.get("/")
+    text = response.get_data(as_text=True)
+    normalized = " ".join(text.split())
+
+    assert response.status_code == 200
+    assert 'action="/habits/1/weekly-goal"' in normalized
+    assert (
+        'id="weekly-goal-1" name="days" type="number" '
+        'min="1" max="7" step="1" value="4"'
+        in normalized
+    )
+    assert (
+        'id="weekly-goal-2" name="days" type="number" '
+        'min="1" max="7" step="1" value=""'
+        in normalized
+    )
+    assert "Deixe vazio para remover a meta." in text
+
+
+def test_weekly_goal_route_returns_404_for_missing_habit(tmp_path):
+    app = create_app(
+        {"TESTING": True, "DATABASE": str(tmp_path / "habitos.sqlite3")}
+    )
+
+    response = app.test_client().post(
+        "/habits/999/weekly-goal", data={"days": "3"}
+    )
+
+    assert response.status_code == 404

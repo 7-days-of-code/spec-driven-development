@@ -29,6 +29,20 @@
           <li>
             <strong>{{ habit["name"] }}</strong>
             <span>Sequência: {{ habit["sequence"] }}</span>
+            <form method="post" action="{{ url_for('set_weekly_goal', habit_id=habit['id']) }}">
+              <label for="weekly-goal-{{ habit['id'] }}">Meta semanal (dias)</label>
+              <input
+                id="weekly-goal-{{ habit['id'] }}"
+                name="days"
+                type="number"
+                min="1"
+                max="7"
+                step="1"
+                value="{{ habit['weekly_goal'] if habit['weekly_goal'] is not none else '' }}"
+              >
+              <button type="submit">Salvar meta</button>
+              <span>Deixe vazio para remover a meta.</span>
+            </form>
             <form method="post" action="{{ url_for('check_in_habit', habit_id=habit['id']) }}">
               <button type="submit">Fiz hoje</button>
             </form>

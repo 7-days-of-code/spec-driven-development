@@ -24,8 +24,8 @@ O projeto já contém `app.py`, `schema.sql`, `templates/index.html`, `tests/tes
 
 **Objetivo**: Preparar o SQLite para armazenar metas sem apagar ou recriar dados existentes. Esta fase bloqueia as histórias de usuário.
 
-- [ ] T001 [P] Adicionar `weekly_goal INTEGER NULL CHECK (weekly_goal IS NULL OR weekly_goal BETWEEN 1 AND 7)` à tabela `habit` criada em `schema.sql`; a meta deve ser nula ou, quando presente, um inteiro entre 1 e 7 inclusive.
-- [ ] T002 [P] Atualizar `init_db()` em `app.py` para consultar `PRAGMA table_info(habit)` após executar `schema.sql` e executar `ALTER TABLE habit ADD COLUMN weekly_goal INTEGER CHECK (weekly_goal IS NULL OR weekly_goal BETWEEN 1 AND 7)` somente se a coluna não existir; não apagar/recriar tabelas nem alterar hábitos ou marcações existentes.
+- [X] T001 [P] Adicionar `weekly_goal INTEGER NULL CHECK (weekly_goal IS NULL OR weekly_goal BETWEEN 1 AND 7)` à tabela `habit` criada em `schema.sql`; a meta deve ser nula ou, quando presente, um inteiro entre 1 e 7 inclusive.
+- [X] T002 [P] Atualizar `init_db()` em `app.py` para consultar `PRAGMA table_info(habit)` após executar `schema.sql` e executar `ALTER TABLE habit ADD COLUMN weekly_goal INTEGER CHECK (weekly_goal IS NULL OR weekly_goal BETWEEN 1 AND 7)` somente se a coluna não existir; não apagar/recriar tabelas nem alterar hábitos ou marcações existentes.
 
 **Checkpoint**: Bancos novos já contêm a coluna e bancos existentes a recebem uma única vez, com hábitos e marcações preservados.
 
@@ -39,12 +39,12 @@ O projeto já contém `app.py`, `schema.sql`, `templates/index.html`, `tests/tes
 
 ### Testes da História de Usuário 1
 
-- [ ] T003 [US1] Adicionar testes em `tests/test_app.py` para definir metas válidas de 1 a 7 por hábito, alterar/remover meta com valor vazio, rejeitar valor inválido com orientação de intervalo, persistir a meta após recriar o app e preservar marcações/sequências ao alterar ou remover.
+- [X] T003 [US1] Adicionar testes em `tests/test_app.py` para definir metas válidas de 1 a 7 por hábito, alterar/remover meta com valor vazio, rejeitar valor inválido com orientação de intervalo, persistir a meta após recriar o app e preservar marcações/sequências ao alterar ou remover.
 
 ### Implementação da História de Usuário 1
 
-- [ ] T004 [P] [US1] Implementar em `app.py` a rota `POST /habits/<int:habit_id>/weekly-goal`: aceitar `days` vazio para remover a meta ou inteiro de 1 a 7 para definir/alterar, rejeitar demais valores sem salvar, mostrar mensagem sobre o intervalo permitido e retornar 404 para hábito inexistente.
-- [ ] T005 [P] [US1] Adicionar em `templates/index.html`, para cada hábito, um formulário POST para `/habits/<id>/weekly-goal` com campo `days` limitado a 1–7, valor atual quando houver meta e opção vazia para removê-la.
+- [X] T004 [P] [US1] Implementar em `app.py` a rota `POST /habits/<int:habit_id>/weekly-goal`: aceitar `days` vazio para remover a meta ou inteiro de 1 a 7 para definir/alterar, rejeitar demais valores sem salvar, mostrar mensagem sobre o intervalo permitido e retornar 404 para hábito inexistente.
+- [X] T005 [P] [US1] Adicionar em `templates/index.html`, para cada hábito, um formulário POST para `/habits/<id>/weekly-goal` com campo `days` limitado a 1–7, valor atual quando houver meta e opção vazia para removê-la.
 
 **Checkpoint**: A pessoa consegue gerenciar metas por hábito; a persistência não altera o histórico de marcações.
 

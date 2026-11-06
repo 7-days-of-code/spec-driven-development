@@ -24,6 +24,13 @@ def init_db():
     db = get_db()
     with current_app.open_resource("schema.sql") as schema_file:
         db.executescript(schema_file.read().decode("utf-8"))
+    columns = {row["name"] for row in db.execute("PRAGMA table_info(habit)")}
+    if "weekly_goal" not in columns:
+        db.execute(
+            "ALTER TABLE habit ADD COLUMN weekly_goal INTEGER "
+            "CHECK (weekly_goal IS NULL OR weekly_goal BETWEEN 1 AND 7)"
+        )
+        db.commit()
 
 
 def normalize_habit_name(value):
@@ -76,7 +83,9 @@ def create_app(test_config=None):
     @app.route("/", methods=["GET"])
     def index():
         db = get_db()
-        habits = db.execute("SELECT id, name FROM habit ORDER BY id").fetchall()
+        habits = db.execute(
+            "SELECT id, name, weekly_goal FROM habit ORDER BY id"
+        ).fetchall()
         today = date.today()
         habit_rows = []
         for habit in habits:
@@ -84,6 +93,7 @@ def create_app(test_config=None):
                 {
                     "id": habit["id"],
                     "name": habit["name"],
+                    "weekly_goal": habit["weekly_goal"],
                     "sequence": get_habit_sequence(db, habit["id"], today),
                 }
             )
@@ -111,6 +121,42 @@ def create_app(test_config=None):
         except sqlite3.IntegrityError:
             flash("Este nome já está em uso.", "error")
 
+        return redirect(url_for("index"))
+
+    @app.route("/habits/<int:habit_id>/weekly-goal", methods=["POST"])
+    def set_weekly_goal(habit_id):
+        db = get_db()
+        habit = db.execute("SELECT id FROM habit WHERE id = ?", (habit_id,)).fetchone()
+        if habit is None:
+            return ("", 404)
+
+        raw_days = request.form.get("days")
+        if raw_days is None:
+            flash("Informe uma meta de 1 a 7 dias por semana.", "error")
+            return redirect(url_for("index"))
+
+        days = raw_days.strip()
+        if not days:
+            db.execute("UPDATE habit SET weekly_goal = NULL WHERE id = ?", (habit_id,))
+            db.commit()
+            flash("Meta semanal removida.", "success")
+            return redirect(url_for("index"))
+
+        try:
+            weekly_goal = int(days)
+        except ValueError:
+            weekly_goal = None
+
+        if weekly_goal is None or not 1 <= weekly_goal <= 7:
+            flash("Informe uma meta de 1 a 7 dias por semana.", "error")
+            return redirect(url_for("index"))
+
+        db.execute(
+            "UPDATE habit SET weekly_goal = ? WHERE id = ?",
+            (weekly_goal, habit_id),
+        )
+        db.commit()
+        flash("Meta semanal atualizada.", "success")
         return redirect(url_for("index"))
 
     @app.route("/habits/<int:habit_id>/check-ins", methods=["POST"])
