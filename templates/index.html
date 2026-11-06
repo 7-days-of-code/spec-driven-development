@@ -29,6 +29,14 @@
           <li>
             <strong>{{ habit["name"] }}</strong>
             <span>Sequência: {{ habit["sequence"] }}</span>
+            {% if habit["weekly_goal"] is not none %}
+              <p>Progresso semanal: {{ habit["weekly_progress"] }} de {{ habit["weekly_goal"] }} dias</p>
+              {% if habit["weekly_goal_met"] %}
+                <p>Meta semanal atingida.</p>
+              {% else %}
+                <p>Meta semanal ainda não atingida.</p>
+              {% endif %}
+            {% endif %}
             <form method="post" action="{{ url_for('set_weekly_goal', habit_id=habit['id']) }}">
               <label for="weekly-goal-{{ habit['id'] }}">Meta semanal (dias)</label>
               <input

@@ -58,12 +58,12 @@ O projeto já contém `app.py`, `schema.sql`, `templates/index.html`, `tests/tes
 
 ### Testes da História de Usuário 2
 
-- [ ] T006 [US2] Adicionar testes em `tests/test_app.py` para contagens abaixo/na meta, marcações de segunda e domingo, exclusão de datas da semana anterior/próxima, reinício do progresso na segunda-feira seguinte e contagem única após tentativas repetidas na mesma data.
+- [X] T006 [US2] Adicionar testes em `tests/test_app.py` para contagens abaixo/na meta, marcações de segunda e domingo, exclusão de datas da semana anterior/próxima, reinício do progresso na segunda-feira seguinte e contagem única após tentativas repetidas na mesma data.
 
 ### Implementação da História de Usuário 2
 
-- [ ] T007 [P] [US2] Atualizar a rota `index()` em `app.py` para calcular o início da semana local com `date.today()` e contar com `COUNT(DISTINCT completed_on)` as datas de `habit_checkin` entre segunda e domingo inclusive, somente para hábitos com meta; expor a contagem e o estado `dias_marcados >= weekly_goal` ao template sem alterar `get_habit_sequence()`.
-- [ ] T008 [P] [US2] Atualizar `templates/index.html` para exibir contagem e estado de atingimento somente quando o hábito possuir meta semanal, mantendo visíveis a sequência e os controles de marcação já existentes.
+- [X] T007 [P] [US2] Atualizar a rota `index()` em `app.py` para calcular o início da semana local com `date.today()` e contar com `COUNT(DISTINCT completed_on)` as datas de `habit_checkin` entre segunda e domingo inclusive, somente para hábitos com meta; expor a contagem e o estado `dias_marcados >= weekly_goal` ao template sem alterar `get_habit_sequence()`.
+- [X] T008 [P] [US2] Atualizar `templates/index.html` para exibir contagem e estado de atingimento somente quando o hábito possuir meta semanal, mantendo visíveis a sequência e os controles de marcação já existentes.
 
 **Checkpoint**: O progresso considera somente a semana local atual e não interfere na sequência diária.
 
@@ -77,7 +77,7 @@ O projeto já contém `app.py`, `schema.sql`, `templates/index.html`, `tests/tes
 
 ### Testes da História de Usuário 3
 
-- [ ] T009 [US3] Adicionar testes de regressão em `tests/test_app.py` criando um banco legado sem `weekly_goal` com hábito e marcação existentes; após `create_app()`, verificar que ambos foram preservados, que o hábito permanece sem meta e que consulta/marcação continuam exibindo a sequência sem estado semanal.
+- [X] T009 [US3] Adicionar testes de regressão em `tests/test_app.py` criando um banco legado sem `weekly_goal` com hábito e marcação existentes; após `create_app()`, verificar que ambos foram preservados, que o hábito permanece sem meta e que consulta/marcação continuam exibindo a sequência sem estado semanal.
 
 **Checkpoint**: Bancos legados e hábitos sem meta continuam compatíveis com os fluxos anteriores.
 
@@ -87,7 +87,7 @@ O projeto já contém `app.py`, `schema.sql`, `templates/index.html`, `tests/tes
 
 **Objetivo**: Verificar a integração de todas as histórias e o roteiro de validação da feature.
 
-- [ ] T010 Executar `python -m pytest -q` na raiz do repositório e seguir os cenários de `specs/002-meta-semanal/quickstart.md`; corrigir falhas relacionadas à feature em `app.py`, `schema.sql`, `templates/index.html` ou `tests/test_app.py`.
+- [X] T010 Executar `python -m pytest -q` na raiz do repositório e seguir os cenários de `specs/002-meta-semanal/quickstart.md`; corrigir falhas relacionadas à feature em `app.py`, `schema.sql`, `templates/index.html` ou `tests/test_app.py`.
 
 ---
 

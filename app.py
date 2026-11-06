@@ -87,13 +87,29 @@ def create_app(test_config=None):
             "SELECT id, name, weekly_goal FROM habit ORDER BY id"
         ).fetchall()
         today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
         habit_rows = []
         for habit in habits:
+            weekly_progress = None
+            weekly_goal_met = False
+            if habit["weekly_goal"] is not None:
+                progress = db.execute(
+                    "SELECT COUNT(DISTINCT completed_on) AS days_marked "
+                    "FROM habit_checkin "
+                    "WHERE habit_id = ? AND completed_on BETWEEN ? AND ?",
+                    (habit["id"], week_start.isoformat(), week_end.isoformat()),
+                ).fetchone()
+                weekly_progress = progress["days_marked"]
+                weekly_goal_met = weekly_progress >= habit["weekly_goal"]
+
             habit_rows.append(
                 {
                     "id": habit["id"],
                     "name": habit["name"],
                     "weekly_goal": habit["weekly_goal"],
+                    "weekly_progress": weekly_progress,
+                    "weekly_goal_met": weekly_goal_met,
                     "sequence": get_habit_sequence(db, habit["id"], today),
                 }
             )

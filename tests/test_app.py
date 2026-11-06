@@ -371,3 +371,183 @@ def test_weekly_goal_route_returns_404_for_missing_habit(tmp_path):
     )
 
     assert response.status_code == 404
+
+
+def test_weekly_progress_counts_only_distinct_days_from_monday_to_sunday(
+    tmp_path, monkeypatch
+):
+    app = create_app(
+        {"TESTING": True, "DATABASE": str(tmp_path / "habitos.sqlite3")}
+    )
+    client = app.test_client()
+
+    class FrozenDate(date):
+        current = date(2026, 11, 8)
+
+        @classmethod
+        def today(cls):
+            return cls.current
+
+    monkeypatch.setattr(app_module, "date", FrozenDate)
+    client.post("/habits", data={"name": "Leitura"})
+    client.post("/habits/1/weekly-goal", data={"days": "3"})
+
+    with sqlite3.connect(app.config["DATABASE"]) as db:
+        db.executemany(
+            "INSERT INTO habit_checkin (habit_id, completed_on) VALUES (?, ?)",
+            (
+                (1, "2026-11-01"),
+                (1, "2026-11-02"),
+                (1, "2026-11-09"),
+            ),
+        )
+
+    def habit_entry():
+        response = client.get("/")
+        assert response.status_code == 200
+        text = response.get_data(as_text=True)
+        start = text.index("<strong>Leitura</strong>")
+        end = text.index("</li>", start)
+        return text[start:end]
+
+    entry = habit_entry()
+    assert "Progresso semanal: 1 de 3 dias" in entry
+    assert "Meta semanal ainda não atingida." in entry
+    assert "Meta semanal atingida." not in entry
+
+    with sqlite3.connect(app.config["DATABASE"]) as db:
+        db.execute(
+            "INSERT INTO habit_checkin (habit_id, completed_on) VALUES (?, ?)",
+            (1, "2026-11-08"),
+        )
+        db.execute(
+            "INSERT INTO habit_checkin (habit_id, completed_on) VALUES (?, ?)",
+            (1, "2026-11-04"),
+        )
+
+    client.post("/habits/1/check-ins")
+    client.post("/habits/1/check-ins")
+    entry = habit_entry()
+    assert "Progresso semanal: 3 de 3 dias" in entry
+    assert "Meta semanal atingida." in entry
+
+
+def test_weekly_progress_resets_on_monday_and_counts_repeated_check_in_once(
+    tmp_path, monkeypatch
+):
+    app = create_app(
+        {"TESTING": True, "DATABASE": str(tmp_path / "habitos.sqlite3")}
+    )
+    client = app.test_client()
+
+    class FrozenDate(date):
+        current = date(2026, 11, 8)
+
+        @classmethod
+        def today(cls):
+            return cls.current
+
+    monkeypatch.setattr(app_module, "date", FrozenDate)
+    client.post("/habits", data={"name": "Caminhada"})
+    client.post("/habits/1/weekly-goal", data={"days": "2"})
+
+    with sqlite3.connect(app.config["DATABASE"]) as db:
+        db.executemany(
+            "INSERT INTO habit_checkin (habit_id, completed_on) VALUES (?, ?)",
+            ((1, "2026-11-02"), (1, "2026-11-08")),
+        )
+
+    FrozenDate.current = date(2026, 11, 9)
+
+    def progress_text():
+        response = client.get("/")
+        assert response.status_code == 200
+        text = response.get_data(as_text=True)
+        start = text.index("<strong>Caminhada</strong>")
+        end = text.index("</li>", start)
+        return text[start:end]
+
+    entry = progress_text()
+    assert "Progresso semanal: 0 de 2 dias" in entry
+    assert "Meta semanal ainda não atingida." in entry
+
+    client.post("/habits/1/check-ins")
+    client.post("/habits/1/check-ins")
+    entry = progress_text()
+    assert "Progresso semanal: 1 de 2 dias" in entry
+    assert "Meta semanal ainda não atingida." in entry
+
+    with sqlite3.connect(app.config["DATABASE"]) as db:
+        assert db.execute(
+            "SELECT COUNT(*) FROM habit_checkin "
+            "WHERE habit_id = 1 AND completed_on = '2026-11-09'"
+        ).fetchone() == (1,)
+
+
+def test_legacy_database_preserves_habits_and_checkins_without_weekly_goal(
+    tmp_path, monkeypatch
+):
+    database = str(tmp_path / "legacy.sqlite3")
+    with sqlite3.connect(database) as db:
+        db.executescript(
+            """
+            CREATE TABLE habit (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL CHECK (length(trim(name)) > 0),
+                name_key TEXT NOT NULL UNIQUE
+            );
+            CREATE TABLE habit_checkin (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                habit_id INTEGER NOT NULL,
+                completed_on TEXT NOT NULL,
+                UNIQUE(habit_id, completed_on),
+                FOREIGN KEY (habit_id) REFERENCES habit(id)
+            );
+            INSERT INTO habit (id, name, name_key)
+            VALUES (1, 'Leitura', 'leitura');
+            INSERT INTO habit_checkin (habit_id, completed_on)
+            VALUES (1, '2026-11-05');
+            """
+        )
+
+    app = create_app({"TESTING": True, "DATABASE": database})
+    client = app.test_client()
+
+    class FrozenDate(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 11, 6)
+
+    monkeypatch.setattr(app_module, "date", FrozenDate)
+
+    with sqlite3.connect(database) as db:
+        columns = {row[1] for row in db.execute("PRAGMA table_info(habit)")}
+        assert "weekly_goal" in columns
+        assert db.execute(
+            "SELECT id, name, weekly_goal FROM habit"
+        ).fetchall() == [(1, "Leitura", None)]
+        assert db.execute(
+            "SELECT habit_id, completed_on FROM habit_checkin"
+        ).fetchall() == [(1, "2026-11-05")]
+
+    response = client.get("/")
+    text = response.get_data(as_text=True)
+    start = text.index("<strong>Leitura</strong>")
+    end = text.index("</li>", start)
+    entry = text[start:end]
+    assert response.status_code == 200
+    assert "Sequência: 1" in entry
+    assert "Progresso semanal:" not in entry
+
+    response = client.post("/habits/1/check-ins", follow_redirects=True)
+    text = response.get_data(as_text=True)
+    start = text.index("<strong>Leitura</strong>")
+    end = text.index("</li>", start)
+    entry = text[start:end]
+    assert response.status_code == 200
+    assert "Sequência: 2" in entry
+    assert "Progresso semanal:" not in entry
+    with sqlite3.connect(database) as db:
+        assert db.execute(
+            "SELECT COUNT(*) FROM habit_checkin WHERE habit_id = 1"
+        ).fetchone() == (2,)
