@@ -36,12 +36,12 @@ description: "Tarefas para implementar hábitos e sequências diárias"
 
 ### Testes da História de Usuário 1
 
-- [ ] T005 [US1] Escrever em `tests/test_app.py` testes HTTP para lista vazia e lista de hábitos, cadastro com aparagem de espaços, rejeição de nome vazio/só espaços e rejeição de duplicatas ignorando caixa e equivalência Unicode NFC; usar banco temporário
+- [x] T005 [US1] Escrever em `tests/test_app.py` testes HTTP para lista vazia e lista de hábitos, cadastro com aparagem de espaços, rejeição de nome vazio/só espaços e rejeição de duplicatas ignorando caixa e equivalência Unicode NFC; usar banco temporário
 
 ### Implementação da História de Usuário 1
 
-- [ ] T006 [US1] Implementar `POST /habits` em `app.py`: aparar o nome, calcular `name_key` com NFC e `casefold()`, usar consulta parametrizada, recusar chave duplicada e apresentar mensagens compreensíveis sem inserir dados inválidos
-- [ ] T007 [US1] Implementar `GET /` em `app.py` e a página correspondente em `templates/index.html`, exibindo o formulário, mensagens, estado vazio e todos os hábitos com sequência inicial 0
+- [x] T006 [US1] Implementar `POST /habits` em `app.py`: aparar o nome, calcular `name_key` com NFC e `casefold()`, usar consulta parametrizada, recusar chave duplicada e apresentar mensagens compreensíveis sem inserir dados inválidos
+- [x] T007 [US1] Implementar `GET /` em `app.py` e a página correspondente em `templates/index.html`, exibindo o formulário, mensagens, estado vazio e todos os hábitos com sequência inicial 0
 
 **Ponto de verificação**: Fluxo de cadastro e consulta funciona isoladamente e seus testes passam.
 

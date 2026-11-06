@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <title>Hábitos e Sequências</title>
+  </head>
+  <body>
+    <h1>Hábito Certo</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('create_habit') }}">
+      <label for="name">Novo hábito</label>
+      <input id="name" name="name" type="text" placeholder="Ex.: Ler 10 minutos">
+      <button type="submit">Cadastrar</button>
+    </form>
+
+    {% if habits %}
+      <ul>
+        {% for habit in habits %}
+          <li>
+            <strong>{{ habit["name"] }}</strong>
+            <span>Sequência: 0</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Ainda não há hábitos cadastrados.</p>
+    {% endif %}
+  </body>
+</html>

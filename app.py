@@ -1,7 +1,8 @@
 import os
 import sqlite3
+import unicodedata
 
-from flask import Flask, current_app, g
+from flask import Flask, current_app, flash, g, redirect, render_template, request, url_for
 
 
 def get_db():
@@ -24,6 +25,12 @@ def init_db():
         db.executescript(schema_file.read().decode("utf-8"))
 
 
+def normalize_habit_name(value):
+    if value is None:
+        return ""
+    return unicodedata.normalize("NFC", value.strip())
+
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -36,6 +43,37 @@ def create_app(test_config=None):
 
     os.makedirs(app.instance_path, exist_ok=True)
     app.teardown_appcontext(close_db)
+
+    @app.route("/", methods=["GET"])
+    def index():
+        habits = get_db().execute(
+            "SELECT id, name FROM habit ORDER BY id"
+        ).fetchall()
+        return render_template("index.html", habits=habits)
+
+    @app.route("/habits", methods=["POST"])
+    def create_habit():
+        raw_name = request.form.get("name", "")
+        name = normalize_habit_name(raw_name)
+
+        if not name:
+            flash("Informe um nome para o hábito.", "error")
+            return redirect(url_for("index"))
+
+        name_key = unicodedata.normalize("NFC", name).casefold()
+        db = get_db()
+
+        try:
+            db.execute(
+                "INSERT INTO habit (name, name_key) VALUES (?, ?)",
+                (name, name_key),
+            )
+            db.commit()
+            flash("Hábito cadastrado com sucesso!", "success")
+        except sqlite3.IntegrityError:
+            flash("Este nome já está em uso.", "error")
+
+        return redirect(url_for("index"))
 
     with app.app_context():
         init_db()
