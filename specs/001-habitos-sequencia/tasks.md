@@ -71,11 +71,11 @@ description: "Tarefas para implementar hábitos e sequências diárias"
 
 ### Testes da História de Usuário 3
 
-- [ ] T012 [US3] Acrescentar a `tests/test_app.py` um cenário HTTP com pelo menos dois hábitos e históricos distintos; marcar um deles e afirmar que a sequência do outro permanece inalterada e que ambos continuam na lista
+- [X] T012 [US3] Acrescentar a `tests/test_app.py` um cenário HTTP com pelo menos dois hábitos e históricos distintos; marcar um deles e afirmar que a sequência do outro permanece inalterada e que ambos continuam na lista
 
 ### Implementação da História de Usuário 3
 
-- [ ] T013 [US3] Isolar em `app.py` a consulta do histórico e o cálculo da sequência por `habit_id`, garantindo que a montagem da lista não compartilhe marcações nem contadores entre hábitos
+- [X] T013 [US3] Isolar em `app.py` a consulta do histórico e o cálculo da sequência por `habit_id`, garantindo que a montagem da lista não compartilhe marcações nem contadores entre hábitos
 
 **Ponto de verificação**: Históricos independentes são demonstrados por testes com múltiplos hábitos.
 
@@ -83,7 +83,7 @@ description: "Tarefas para implementar hábitos e sequências diárias"
 
 **Objetivo**: Validar a entrega integrada e manter as instruções de execução alinhadas ao projeto.
 
-- [ ] T014 Executar `python -m pytest` e seguir a instalação e execução descritas em `specs/001-habitos-sequencia/quickstart.md`; corrigir divergências entre as instruções, `requirements.txt` e os caminhos locais de execução
+- [X] T014 Executar `python -m pytest` e seguir a instalação e execução descritas em `specs/001-habitos-sequencia/quickstart.md`; corrigir divergências entre as instruções, `requirements.txt` e os caminhos locais de execução
 
 ## Dependências e ordem de execução
 

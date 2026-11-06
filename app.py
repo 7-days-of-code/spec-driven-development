@@ -36,27 +36,24 @@ def get_habit_sequence(db, habit_id, today=None):
     if today is None:
         today = date.today()
 
-    rows = db.execute(
-        "SELECT completed_on FROM habit_checkin WHERE habit_id = ? ORDER BY completed_on DESC",
-        (habit_id,),
-    ).fetchall()
+    checkin_dates = {
+        date.fromisoformat(row["completed_on"])
+        for row in db.execute(
+            "SELECT completed_on FROM habit_checkin WHERE habit_id = ?",
+            (habit_id,),
+        ).fetchall()
+    }
 
-    if not rows:
+    if not checkin_dates:
         return 0
 
-    last_date = date.fromisoformat(rows[0]["completed_on"])
+    last_date = max(checkin_dates)
     if last_date < today - timedelta(days=1):
         return 0
 
     streak = 0
     cursor = last_date
-    while True:
-        existing = db.execute(
-            "SELECT 1 FROM habit_checkin WHERE habit_id = ? AND completed_on = ?",
-            (habit_id, cursor.isoformat()),
-        ).fetchone()
-        if existing is None:
-            break
+    while cursor in checkin_dates:
         streak += 1
         cursor -= timedelta(days=1)
 

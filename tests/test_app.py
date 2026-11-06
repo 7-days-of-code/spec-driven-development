@@ -94,3 +94,46 @@ def test_check_in_sequence_and_missing_habit(tmp_path, monkeypatch):
 
     response = client.post("/habits/999/check-ins")
     assert response.status_code == 404
+
+
+def test_check_ins_keep_habit_sequences_independent(tmp_path, monkeypatch):
+    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "habitos.sqlite3")})
+    client = app.test_client()
+
+    class FrozenDate(date):
+        current = date(2026, 11, 10)
+
+        @classmethod
+        def today(cls):
+            return cls.current
+
+    monkeypatch.setattr(app_module, "date", FrozenDate)
+
+    client.post("/habits", data={"name": "Leitura"})
+    client.post("/habits", data={"name": "Exercício"})
+
+    for day in (10, 11, 12):
+        FrozenDate.current = date(2026, 11, day)
+        client.post("/habits/1/check-ins")
+    client.post("/habits/2/check-ins")
+
+    def entry_for(text, name):
+        start = text.index(f"<strong>{name}</strong>")
+        end = text.index("</li>", start)
+        return text[start:end]
+
+    response = client.get("/")
+    text = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert "Sequência: 3" in entry_for(text, "Leitura")
+    assert "Sequência: 1" in entry_for(text, "Exercício")
+
+    FrozenDate.current = date(2026, 11, 13)
+    response = client.post("/habits/2/check-ins", follow_redirects=True)
+    text = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "Leitura" in entry_for(text, "Leitura")
+    assert "Exercício" in entry_for(text, "Exercício")
+    assert "Sequência: 3" in entry_for(text, "Leitura")
+    assert "Sequência: 2" in entry_for(text, "Exercício")
