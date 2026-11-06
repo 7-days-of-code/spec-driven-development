@@ -53,13 +53,13 @@ description: "Tarefas para implementar hábitos e sequências diárias"
 
 ### Testes da História de Usuário 2
 
-- [ ] T008 [US2] Acrescentar testes em `tests/test_app.py` para `POST /habits/<id>/check-ins`, controlando a data usada pela aplicação e cobrindo primeira marcação, repetição idempotente, dias consecutivos, lacuna, sequência 0 antes de remarcar e resposta 404 para hábito inexistente
+- [x] T008 [US2] Acrescentar testes em `tests/test_app.py` para `POST /habits/<id>/check-ins`, controlando a data usada pela aplicação e cobrindo primeira marcação, repetição idempotente, dias consecutivos, lacuna, sequência 0 antes de remarcar e resposta 404 para hábito inexistente
 
 ### Implementação da História de Usuário 2
 
-- [ ] T009 [US2] Implementar em `app.py` o cálculo da sequência a partir das datas registradas para o hábito: retornar 0 sem marcações ou se a última for anterior a ontem; nos demais casos, contar datas consecutivas para trás a partir da última marcação
-- [ ] T010 [US2] Implementar `POST /habits/<habit_id>/check-ins` em `app.py`, associando `date.today()` ao hábito, usando inserção idempotente para não duplicar `(habit_id, completed_on)`, retornando 404 para hábito inexistente e redirecionando à lista
-- [ ] T011 [US2] Atualizar `templates/index.html` para exibir a sequência atualizada e um formulário “Fiz hoje” por hábito, enviando POST ao endpoint correspondente sem aceitar data do navegador
+- [x] T009 [US2] Implementar em `app.py` o cálculo da sequência a partir das datas registradas para o hábito: retornar 0 sem marcações ou se a última for anterior a ontem; nos demais casos, contar datas consecutivas para trás a partir da última marcação
+- [x] T010 [US2] Implementar `POST /habits/<habit_id>/check-ins` em `app.py`, associando `date.today()` ao hábito, usando inserção idempotente para não duplicar `(habit_id, completed_on)`, retornando 404 para hábito inexistente e redirecionando à lista
+- [x] T011 [US2] Atualizar `templates/index.html` para exibir a sequência atualizada e um formulário “Fiz hoje” por hábito, enviando POST ao endpoint correspondente sem aceitar data do navegador
 
 **Ponto de verificação**: Marcações e sequências obedecem às regras de data local e repetição diária.
 

@@ -28,7 +28,10 @@
         {% for habit in habits %}
           <li>
             <strong>{{ habit["name"] }}</strong>
-            <span>Sequência: 0</span>
+            <span>Sequência: {{ habit["sequence"] }}</span>
+            <form method="post" action="{{ url_for('check_in_habit', habit_id=habit['id']) }}">
+              <button type="submit">Fiz hoje</button>
+            </form>
           </li>
         {% endfor %}
       </ul>
