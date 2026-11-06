@@ -1,56 +1,50 @@
-# Pedidos do Dia 6 — O código bate com o spec?
+# Pedidos do Dia 7 — Mude o spec primeiro
 
-Tudo o que foi digitado ou escrito para chegar a esta solução.
+Tudo o que foi digitado para chegar a esta solução. A meta semanal entrou pelo ciclo completo: spec, plano, tarefas e código. Cada pedido foi feito num chat novo, no modo agente.
 
-## 1. Convergência
-
-Num chat novo, no modo agente:
+## 1. Spec da funcionalidade nova
 
 ```
-/speckit-converge Responda em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Compare o código com o spec.md, incluindo a constituição, e liste as divergências encontradas antes de acrescentar qualquer tarefa.
+/speckit-specify Escreva em português do Brasil. Nova funcionalidade do Hábito Certo: meta semanal. A pessoa pode definir, para cada hábito, quantos dias por semana quer cumpri-lo, de 1 a 7. A lista mostra, para cada hábito com meta, quantos dias ele foi marcado na semana atual e se a meta da semana foi atingida. A semana vai de segunda a domingo, pela data local do computador. Hábitos sem meta continuam funcionando como antes.
 ```
 
-**Resultado:** o comando encontrou **uma** lacuna. O critério SC-003 pede três hábitos, e o teste usava dois. Ele criou a tarefa T015 numa nova "Fase 7: Convergência" do `tasks.md`.
+A descrição já diz quando a semana começa: sem isso, o agente escolheria sozinho. O comando criou a branch `002-meta-semanal` e a pasta `specs/002-meta-semanal`.
 
-## 2. Checklist spec ↔ código (escrito à mão)
-
-O arquivo [`checklists/spec-codigo.md`](specs/001-habitos-sequencia/checklists/spec-codigo.md) foi montado lendo o spec e o código, requisito por requisito. Ele encontrou cinco divergências, das quais o `converge` só tinha apontado uma.
-
-## 3. Correções feitas à mão
-
-No `spec.md`, abaixo do FR-013, porque o código fazia algo que o spec não dizia:
+## 2. Plano
 
 ```
-- **FR-014**: O sistema MUST remover os espaços do começo e do fim do nome antes de salvar e de comparar, e MUST tratar como iguais nomes que só diferem na forma de escrever os acentos.
+/speckit-plan Escreva em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Use a mesma stack e a mesma estrutura do projeto atual (Flask, SQLite, pytest, app.py, schema.sql, templates/index.html). A meta precisa funcionar com o banco que já existe, sem apagar dados.
 ```
 
-No `tasks.md`, abaixo da T015, porque o FR-013 não tinha nenhum teste:
+A última frase é de propósito: acrescentar uma coluna ao banco é o tipo de mudança em que o erro do `DROP TABLE` do Dia 5 poderia voltar. O plano escolheu acrescentar a coluna só se ela não existir, sem apagar nada.
+
+## 3. Tarefas
 
 ```
-- [ ] T016 Acrescentar teste que cadastra e marca um hábito, recria o app com o mesmo banco e confirma que o hábito e a sequência continuam lá, conforme FR-013
+/speckit-tasks Escreva em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Organize as tarefas por história de usuário.
 ```
 
-## 4. Implementar os testes que faltavam
-
-Num chat novo:
+## 4. Implementação, em dois pedidos
 
 ```
-/speckit-implement Responda em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Execute somente a Fase 7 (T015 e T016) e pare. Marque as tarefas concluídas no tasks.md.
+/speckit-implement Responda em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Execute as Fases 1, 2 e 3 (até a T005) e pare. Marque as tarefas concluídas no tasks.md.
 ```
 
-O agente parou e perguntou: "Some checklists have unchecked items. Do you want to proceed with implementation anyway?". O motivo eram as caixinhas `[ ]` do checklist da etapa 2. A resposta foi:
-
 ```
-yes
+/speckit-implement Responda em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Execute as Fases 4, 5 e 6 (T006 a T010) e pare. Marque as tarefas concluídas no tasks.md.
 ```
 
-## 5. Teste do teste
+## 5. README
 
-Para conferir que o teste novo do FR-013 funciona, o `DROP TABLE` foi recolocado de propósito no `schema.sql`. O teste falhou, como devia. Com o `DROP TABLE` removido de novo, os 7 testes passaram.
+Escrito à mão, sem o agente.
 
-## Commit
+## Commits
 
 ```
 git add .
-git commit -m "test: confere spec contra código e fecha divergências (FR-014, T015, T016)"
+git commit -m "docs: especifica a meta semanal (002)"
+git commit -m "docs: planeja e quebra em tarefas a meta semanal (002)"
+git commit -m "feat: define meta semanal por hábito com migração do banco (002, T001-T005)"
+git commit -m "feat: mostra progresso da meta na semana atual (002, T006-T010)"
+git commit -m "docs: acrescenta README do projeto"
 ```
