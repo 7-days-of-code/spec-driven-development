@@ -137,3 +137,80 @@ def test_check_ins_keep_habit_sequences_independent(tmp_path, monkeypatch):
     assert "Exercício" in entry_for(text, "Exercício")
     assert "Sequência: 3" in entry_for(text, "Leitura")
     assert "Sequência: 2" in entry_for(text, "Exercício")
+
+
+def test_three_habit_sequences_remain_independent(tmp_path, monkeypatch):
+    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "habitos.sqlite3")})
+    client = app.test_client()
+
+    class FrozenDate(date):
+        current = date(2026, 11, 10)
+
+        @classmethod
+        def today(cls):
+            return cls.current
+
+    monkeypatch.setattr(app_module, "date", FrozenDate)
+
+    for name in ("Leitura", "Exercício", "Meditação"):
+        client.post("/habits", data={"name": name})
+
+    for day, habit_ids in (
+        (10, (1,)),
+        (11, (1, 2)),
+        (12, (1, 2, 3)),
+    ):
+        FrozenDate.current = date(2026, 11, day)
+        for habit_id in habit_ids:
+            client.post(f"/habits/{habit_id}/check-ins")
+
+    FrozenDate.current = date(2026, 11, 12)
+
+    def entry_for(text, name):
+        start = text.index(f"<strong>{name}</strong>")
+        end = text.index("</li>", start)
+        return text[start:end]
+
+    response = client.get("/")
+    text = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert "Sequência: 3" in entry_for(text, "Leitura")
+    assert "Sequência: 2" in entry_for(text, "Exercício")
+    assert "Sequência: 1" in entry_for(text, "Meditação")
+
+    FrozenDate.current = date(2026, 11, 13)
+    response = client.post("/habits/2/check-ins", follow_redirects=True)
+    text = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "Sequência: 3" in entry_for(text, "Leitura")
+    assert "Sequência: 3" in entry_for(text, "Exercício")
+    assert "Sequência: 1" in entry_for(text, "Meditação")
+
+
+def test_habits_and_sequences_persist_after_app_recreation(tmp_path, monkeypatch):
+    database = str(tmp_path / "habitos.sqlite3")
+    app = create_app({"TESTING": True, "DATABASE": database})
+    client = app.test_client()
+
+    class FrozenDate(date):
+        current = date(2026, 11, 10)
+
+        @classmethod
+        def today(cls):
+            return cls.current
+
+    monkeypatch.setattr(app_module, "date", FrozenDate)
+
+    client.post("/habits", data={"name": "Leitura"})
+    for day in (10, 11, 12):
+        FrozenDate.current = date(2026, 11, day)
+        client.post("/habits/1/check-ins")
+
+    recreated_app = create_app({"TESTING": True, "DATABASE": database})
+    response = recreated_app.test_client().get("/")
+    text = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "Leitura" in text
+    assert "Sequência: 3" in text

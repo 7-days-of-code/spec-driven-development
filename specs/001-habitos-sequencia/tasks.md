@@ -118,3 +118,9 @@ description: "Tarefas para implementar hábitos e sequências diárias"
 5. Executar a validação integrada descrita no quickstart.
 
 **Escopo MVP sugerido**: US1 como primeiro incremento demonstrável. Para atender ao objetivo principal do produto de acompanhar cumprimento diário, incluir US2 logo em seguida.
+
+## Fase 7: Convergência
+
+- [X] T015 Acrescentar teste com pelo menos três hábitos e históricos distintos, verificando que cada sequência permanece independente após uma marcação, conforme SC-003 (partial)
+
+- [X] T016 Acrescentar teste que cadastra e marca um hábito, recria o app com o mesmo banco e confirma que o hábito e a sequência continuam lá, conforme FR-013

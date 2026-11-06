@@ -1,72 +1,56 @@
-# Pedidos do Dia 5 — Mande o agente construir
+# Pedidos do Dia 6 — O código bate com o spec?
 
-Tudo o que foi digitado para chegar a esta solução. As 14 tarefas foram implementadas **por fase**, em quatro pedidos, com revisão e commit depois de cada um. Cada pedido foi feito num chat novo, no modo agente.
+Tudo o que foi digitado ou escrito para chegar a esta solução.
 
-## Pedido 1: Fases 1 e 2 (T001 a T004)
+## 1. Convergência
 
-```
-/speckit-implement Responda em português do Brasil. Execute somente as Fases 1 e 2 (T001 a T004) e pare. Marque as tarefas concluídas no tasks.md.
-```
-
-**A revisão encontrou um problema grave:** o `schema.sql` começava com `DROP TABLE IF EXISTS`, e o app rodava esse arquivo toda vez que abria. Ou seja, **apagava todos os dados a cada vez que era aberto**. O teste do próprio agente só conferia se o app abria.
-
-A causa estava no spec: ele nunca dizia que os dados continuam salvos depois de fechar o app. A correção seguiu a ordem do SDD. Primeiro, esta linha foi acrescentada ao `spec.md`, à mão, abaixo do FR-012:
+Num chat novo, no modo agente:
 
 ```
-- **FR-013**: Os hábitos e as marcações MUST continuar salvos depois que o app é fechado e aberto de novo.
+/speckit-converge Responda em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Compare o código com o spec.md, incluindo a constituição, e liste as divergências encontradas antes de acrescentar qualquer tarefa.
 ```
 
-Depois, num chat novo:
+**Resultado:** o comando encontrou **uma** lacuna. O critério SC-003 pede três hábitos, e o teste usava dois. Ele criou a tarefa T015 numa nova "Fase 7: Convergência" do `tasks.md`.
+
+## 2. Checklist spec ↔ código (escrito à mão)
+
+O arquivo [`checklists/spec-codigo.md`](specs/001-habitos-sequencia/checklists/spec-codigo.md) foi montado lendo o spec e o código, requisito por requisito. Ele encontrou cinco divergências, das quais o `converge` só tinha apontado uma.
+
+## 3. Correções feitas à mão
+
+No `spec.md`, abaixo do FR-013, porque o código fazia algo que o spec não dizia:
 
 ```
-Responda em português do Brasil. O spec ganhou o FR-013: os dados devem continuar salvos depois que o app é fechado e aberto de novo. Hoje o schema.sql começa com DROP TABLE e o create_app roda o init_db toda vez que o app inicia, o que apaga tudo. Corrija para criar as tabelas só se ainda não existirem, sem apagar dados. Não mude mais nada.
+- **FR-014**: O sistema MUST remover os espaços do começo e do fim do nome antes de salvar e de comparar, e MUST tratar como iguais nomes que só diferem na forma de escrever os acentos.
 ```
 
-## Pedido 2: Fase 3 (T005 a T007)
+No `tasks.md`, abaixo da T015, porque o FR-013 não tinha nenhum teste:
 
 ```
-/speckit-implement Responda em português do Brasil. Execute somente a Fase 3 (T005 a T007) e pare. Marque as tarefas concluídas no tasks.md.
+- [ ] T016 Acrescentar teste que cadastra e marca um hábito, recria o app com o mesmo banco e confirma que o hábito e a sequência continuam lá, conforme FR-013
 ```
 
-## Pedido 3: Fase 4 (T008 a T011)
+## 4. Implementar os testes que faltavam
+
+Num chat novo:
 
 ```
-/speckit-implement Responda em português do Brasil. Execute somente a Fase 4 (T008 a T011) e pare. Marque as tarefas concluídas no tasks.md.
+/speckit-implement Responda em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Execute somente a Fase 7 (T015 e T016) e pare. Marque as tarefas concluídas no tasks.md.
 ```
 
-O agente parou antes de começar e perguntou se devia fazer um commit das mudanças pendentes. Como tudo já estava commitado, a resposta foi:
+O agente parou e perguntou: "Some checklists have unchecked items. Do you want to proceed with implementation anyway?". O motivo eram as caixinhas `[ ]` do checklist da etapa 2. A resposta foi:
 
 ```
-Não precisa, já está tudo commitado. Pode seguir com a Fase 4 (T008 a T011) e parar no fim.
+yes
 ```
 
-## Pedido 4: Fases 5 e 6 (T012 a T014)
+## 5. Teste do teste
 
-A frase sobre o commit entrou no pedido para o agente não parar de novo:
+Para conferir que o teste novo do FR-013 funciona, o `DROP TABLE` foi recolocado de propósito no `schema.sql`. O teste falhou, como devia. Com o `DROP TABLE` removido de novo, os 7 testes passaram.
 
-```
-/speckit-implement Responda em português do Brasil. Já está tudo commitado, não precisa fazer commit antes. Execute as Fases 5 e 6 (T012 a T014) e pare. Marque as tarefas concluídas no tasks.md.
-```
-
-## Commits
-
-Um depois de cada pedido, pelo terminal:
+## Commit
 
 ```
 git add .
-git commit -m "feat: prepara projeto e fundação (T001-T004) e garante dados salvos (FR-013)"
-git commit -m "feat: cadastra e lista hábitos (US1, T005-T007)"
-git commit -m "feat: marca hábito do dia e calcula a sequência (US2, T008-T011)"
-git commit -m "feat: isola sequências entre hábitos e valida a entrega (US3, T012-T014)"
+git commit -m "test: confere spec contra código e fecha divergências (FR-014, T015, T016)"
 ```
-
-## Rodar o app
-
-O agente criou o ambiente virtual `.venv` na Fase 1. No Windows:
-
-```
-.\.venv\Scripts\Activate.ps1
-python -m flask --app app run --host 127.0.0.1
-```
-
-Abrir http://127.0.0.1:5000 no navegador. Para os testes: `python -m pytest`.
