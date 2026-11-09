@@ -64,7 +64,7 @@ Dia 7  Mude o spec primeiro          → meta semanal pelo ciclo completo + READ
 
 ## Como Executar os Desafios Diários
 
-1. Siga o e-mail do dia. Ele traz o conceito, o desafio e os comandos.
+1. Siga o e-mail do dia. Ele traz o conceito, o desafio e como saber que você concluiu.
 2. Ao terminar, compare o seu projeto com a branch de solução daquele dia:
    - `solucao-dia-1`: spec escrito à mão e script de terminal
    - `solucao-dia-2`: Spec Kit iniciado e constituição
@@ -73,8 +73,9 @@ Dia 7  Mude o spec primeiro          → meta semanal pelo ciclo completo + READ
    - `solucao-dia-5`: app rodando com as histórias P1 e P2
    - `solucao-dia-6`: checklist spec ↔ código e divergências corrigidas
    - `solucao-dia-7`: meta semanal e projeto completo
-3. Os arquivos que mais importam comparar são os que você escreveu ou decidiu: `.specify/memory/constitution.md`, `specs/*/spec.md`, `specs/*/plan.md` e `specs/*/tasks.md`. As pastas `.github/skills` e `.specify` trazem os comandos do Spec Kit e são iguais para todo mundo.
-4. Para rodar o app da solução, com Python 3.11 ou superior:
+3. Em cada branch, o arquivo `PEDIDOS.md` mostra os comandos no terminal e os pedidos ao agente usados naquele dia, na ordem, com o que aconteceu no caminho.
+4. Os arquivos que mais importam comparar são os que você escreveu ou decidiu: `.specify/memory/constitution.md`, `specs/*/spec.md`, `specs/*/plan.md` e `specs/*/tasks.md`. Tirando a constituição, os arquivos das pastas `.github/skills` e `.specify` são criados pelo Spec Kit e saem iguais para todo mundo que usa a mesma versão.
+5. Para rodar o app da solução, com Python 3.11 ou superior:
 
 ```powershell
 py -3 -m venv .venv
@@ -85,4 +86,4 @@ python -m flask --app app run --host 127.0.0.1
 
    Abra http://127.0.0.1:5000 no navegador. Para rodar os testes: `python -m pytest`.
 
-5. Compartilhe o seu progresso nas redes com a hashtag **#7DaysOfCode**, e use **#feedback7DoC** se quiser ajuda.
+6. Compartilhe o seu progresso nas redes com a hashtag **#7DaysOfCode**, e use **#feedback7DoC** se quiser ajuda.
