@@ -38,7 +38,6 @@ Dia 7  Mude o spec primeiro          → meta semanal pelo ciclo completo + READ
   1. **Conceito:** a ideia do dia, explicada antes da prática.
   2. **Especificação ou revisão:** você escreve, decide ou confere.
   3. **Execução com o agente:** um comando do Spec Kit ou um pedido ao agente.
-  4. **Entrega do dia:** commit do que foi feito, comparável com a branch de solução.
 
 ---
 
